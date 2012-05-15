@@ -1,36 +1,15 @@
 //
 //
-//
-//
-// Default disabled, but gets enable by onload extension
-var state = 0;
-function updateIcon() {
-    if (state == 1){
-        chrome.browserAction.setIcon({path:"icon_off.png"});
-        state = 0;
-    } else {
-        chrome.browserAction.setIcon({path:"icon.png"});
-        state = 1;
-    }
-};
-var filter = {
-    urls: [ "<all_urls>" ]
-};
-var opt_extraInfoSpec = ['blocking'];
-
-handler = function(details) {
-    if (state==0){return};
-    url = details.url;
-    /* check */
+function checkRedirect(url) {
     var objPattern = /(?:^(?:javascript)|[?&=](?:www)|[/?&=*+-](?:ftp|http|https)|[?&=~](?:ZnRw|aHR0c))/i;
     if(!objPattern.test(url)) {
-        return
+        return url;
     }
         		
     /* subscribe */
     var objPattern = /(?:subscribe|login|logout|register|signin|signout|signon|signoff|signup)/i;
     if(objPattern.test(url)) {
-        return
+        return url;
     }
         		
     /* javascript */
@@ -39,8 +18,7 @@ handler = function(details) {
     if(arrMatches) {
         var value = (arrMatches[1] || arrMatches[2]);
         console.log("NOK: " + url + "  >>>>  " + value);
-    	//return value;
-    	return {"redirectUrl": value};
+    	return value;
     }
 		
     /* www */
@@ -52,8 +30,7 @@ handler = function(details) {
             value = decodeURIComponent(value);
         }
         console.log("NOK: http://" + url + "  >>>>  " + value);
-        //		return "http://" + value;
-        return {"redirectUrl": "http://" + value};
+        return "http://" + value;
     }
 		
     /* http */
@@ -65,7 +42,7 @@ handler = function(details) {
             value = decodeURIComponent(value);
         }
         console.log("NOK: " + url + "  >>>>  " + value);
-        return {"redirectUrl": value};
+        return value;
     }
         		
     /* http */
@@ -74,7 +51,7 @@ handler = function(details) {
     if(arrMatches) {
         var value = (arrMatches[1] || arrMatches[2]);
         console.log("NOK: " + url + "  >>>>  " + decodeURIComponent(value));
-        return {"redirectUrl": decodeURIComponent(value)};
+        return decodeURIComponent(value);
     }
     		
     /* http */
@@ -83,7 +60,7 @@ handler = function(details) {
     if(arrMatches) {
         var value = (arrMatches[1] || arrMatches[2]);
         console.log("NOK: " + url + "  >>>>  " + decodeURIComponent(decodeURIComponent(value)));
-        return {"redirectUrl": decodeURIComponent(decodeURIComponent(value))};
+        return decodeURIComponent(decodeURIComponent(value));
     }
         		
     /* base64 */
@@ -96,15 +73,17 @@ handler = function(details) {
                 value = decodeURIComponent(value);
             }
             console.log("NOK: " + url + "  >>>>  " + value);
-            return {"redirectUrl": value};
+            return value;
         } catch(e) {
         }
     }
-    return {"redirectUrl": url};
+    return url;
 };
 
+var links = document.querySelectorAll("a");
+for (var i  = 0; i < links.length; ++i) {
+	//var text = links[i].textContent;
+	var link = links[i].href;
+	links[i].href = checkRedirect(link);
+}
 
-chrome.browserAction.onClicked.addListener(updateIcon);
-updateIcon();
-
-chrome.webRequest.onBeforeRequest.addListener(handler, filter, opt_extraInfoSpec);

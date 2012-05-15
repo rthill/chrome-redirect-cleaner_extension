@@ -1,13 +1,17 @@
 {
     "name": "Redirect cleaner",
-    "version": "1.1",
-    "background": {
-	    "scripts": ["background.js"]
-    },
-    "permissions": ["webRequest", "webRequestBlocking", "tabs", "<all_urls>"],
-    "browser_action": {
-    	"default_title": "Redirect cleaner",
-    	"default_icon": "icon.png"
-    },
+    "description": "Strip redirect urls.",
+    "version": "1.2",
+    "permissions": ["tabs", "<all_urls>"],
+    "icons": { "128": "icon-big.png" },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"],
+        "run_at": "document_end"
+      }
+    ],
+    "permissions": ["tabs", "<all_urls>"],
     "manifest_version": 2
 }
+
