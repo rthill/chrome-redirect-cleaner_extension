@@ -80,10 +80,19 @@ function checkRedirect(url) {
     return url;
 };
 
-var links = document.querySelectorAll("a");
-for (var i  = 0; i < links.length; ++i) {
+var state = localStorage.getItem("state");
+console.log(state);
+if (state == null || typeof(state) == "undefined") {
+    localStorage["state"] = 1;
+    state = 1;
+}
+
+if (state == 1){
+    var links = document.querySelectorAll("a");
+    for (var i  = 0; i < links.length; ++i) {
 	//var text = links[i].textContent;
 	var link = links[i].href;
 	links[i].href = checkRedirect(link);
+    }
 }
 
